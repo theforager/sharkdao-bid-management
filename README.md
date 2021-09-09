@@ -3,12 +3,15 @@
 Simple contract to allow more flexible bidding on Nouns for SharkDAO
 
 `contract` contains the SharkDaoBidder
+
 `script` contains deployment
+
 `test` contains unit tests
+
 
 ## Environment Configuration
 
-Required only for test tools:
+The following variables must be included in your shell environment where you're executing the script. These can be placed in your `~/.zshrc` or `~/.bash_profile` as exports:
 
 `RINKEBY_PRIVATE_KEY`: Private key for the address to use on **Rinkeby/Goerli** for deployment, settlement, etc.
 `MAINNET_PRIVATE_KEY`: Private key for the address to use on **Rinkeby** for deployment, settlement, etc.
@@ -20,7 +23,9 @@ Required only for test tools:
 ## Testing Contract Locally
 
 Install NPM dependencies `npm install`
+
 Run tests locally with Hardhat `npx hardhat test`
+
 All tests should pass
 
 
@@ -28,8 +33,9 @@ All tests should pass
 
 After testing, deploy to your network of choice:
 
-Rinkeby `npx hardhat run scripts/deploy.js --network rinkeby`
-Mainnet `npx hardhat run scripts/deploy.js --network mainnet`
+Rinkeby: `npx hardhat run scripts/deploy.js --network rinkeby`
+
+Mainnet: `npx hardhat run scripts/deploy.js --network mainnet`
 
 NounsAuctionHouseProxy address is required and hardcoded into `scripts/address.js`
 
