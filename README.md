@@ -38,14 +38,14 @@ NounsAuctionHouseProxy address is required and hardcoded into `scripts/address.j
 
 Several tools are available to manage the auctions on test networks:
 
-## `bid-auction --bid <bid_in_ETH> --noun <nounId> --network <networkName>`
-Submit a bid to the current live auction. Bid should be supplied in ETH not wei/gwei.
+- `bid-auction --bid <bid_in_ETH> --noun <nounId> --network <networkName>`
+  - Submit a bid to the current live auction. Bid should be supplied in ETH not wei/gwei.
 
-## `settle-auction --network <networkName>`
-Settle an auction whose bidding window has ended and kicks off the next auction
+- `settle-auction --network <networkName>`
+  - Settle an auction whose bidding window has ended and kicks off the next auction
 
-## `check-auction --network <networkName>`
-Returns the status of the currently live auction.
+- `check-auction --network <networkName>`
+  - Returns the status of the currently live auction.
 
-## `get-image --noun <nounId> --network <networkName>`
-Get the full image of the supplied Noun #. Stored as `.html` in the `img` folder. Open in a browser.
+- `get-image --noun <nounId> --network <networkName>`
+  - Get the full image of the supplied Noun #. Stored as `.html` in the `img` folder. Open in a browser.
