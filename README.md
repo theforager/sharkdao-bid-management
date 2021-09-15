@@ -15,6 +15,8 @@ DAO Bidder Only:
  - `pullFunds()`: Pull any ETH in the contract back to the Ownerr
  - `pullNoun(uint256 _nounId)`: Pull Noun # `_nounId` from the contract back to the Owner
 
+Anyone:
+ - `addFunds()`: Convience method to send Ether to contract (normally done by owner but left open to anyone if needed)
 
 ## Structure
 
