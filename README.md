@@ -5,15 +5,15 @@ This contract enables easier bid management for the Shark DAO in Nouns auctions.
 ### Functionality
 
 Owner-Only:
- - `transferOwnership(address)`: Transfer ownership to a new address but requires pulling funds & Nouns first
+ - `transferOwnership(address _newOwner)`: Transfer ownership to a new address `_newOwner` but requires pulling funds & Nouns first
  - `renounceOwnership()`: Transfer ownership to the burn address but requires pulling funds & Nouns first
  - 
 
 DAO Bidder Only:
- - `removeDaoBidder(address)`: Remove the access of another DAO bidder (available for pre-emptive security but should not be abused)
- - `submitBid(uint256 nounId, uint256 bid)`: Submit an auction bid of `bid` for the Noun `noundId` (contract must have sufficient funds)
- - `pullFunds()`: Pull any ETH in the contractat back to the Ownerr
- - `pullNoun(uint256 _nounId)`: Pull the specified  Noun from the contract back to the Owner
+ - `removeDaoBidder(address _oldBidder)`: Remove the access of another DAO bidder `_oldBidder` (available for pre-emptive security but should not be abused)
+ - `submitBid(uint256 _nounId, uint256 _bid)`: Submit an auction bid of `_bid` for the Noun `_noundId` (contract must have sufficient funds)
+ - `pullFunds()`: Pull any ETH in the contract back to the Ownerr
+ - `pullNoun(uint256 _nounId)`: Pull Noun # `_nounId` from the contract back to the Owner
 
 
 ## Structure
