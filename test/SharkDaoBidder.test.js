@@ -87,25 +87,15 @@ describe("SharkDaoBidder", function () {
 
 
   describe("Max Bid & Return", async function() {
-    it("Should allow owner to set a proper max bid", async function() {
-      let nounId = 13;
-      let maxBid = parseUnits("3", "ether");
-
-      const tx = await bidderContract.setMaxBid(nounId, maxBid, {value: maxBid});
-      await tx.wait();
-
-      expect(await bidderContract.maxBids(nounId)).to.equal(maxBid);
-    });
-
     it("Should allow owner to withdraw all funds", async function() {
       let startBalance = await owner.signer.getBalance();
-      let maxBid = parseUnits("1", "ether");
+      let fundAmount = parseUnits("1", "ether");
       
-      const tx1 = await bidderContract.setMaxBid(13, maxBid, {value: maxBid});
+      const tx1 = await owner.signer.sendTransaction({to: bidderContract.address, value: fundAmount});
       const rcp1 = await tx1.wait();
       const gasEth1 = rcp1.gasUsed.mul(tx1.gasPrice);
 
-      expect(await owner.signer.getBalance()).to.equal(startBalance.sub(maxBid).sub(gasEth1));
+      expect(await owner.signer.getBalance()).to.equal(startBalance.sub(fundAmount).sub(gasEth1));
 
       const contractBal = await ethers.provider.getBalance(bidderContract.address);
 
@@ -114,36 +104,40 @@ describe("SharkDaoBidder", function () {
       const gasEth2 = rcp2.gasUsed.mul(tx2.gasPrice);
 
       expect(await ethers.provider.getBalance(bidderContract.address)).to.equal(0);
-      expect(await owner.signer.getBalance()).to.equal(startBalance.sub(maxBid).sub(gasEth1).sub(gasEth2).add(contractBal));
+      expect(await owner.signer.getBalance()).to.equal(startBalance.sub(fundAmount).sub(gasEth1).sub(gasEth2).add(contractBal));
     });
 
-    
-    it("Should prevent non-owners from setting max bids", async function() {
-      let maxBid = parseUnits("0.2", "ether");
-
-      nonOwners.forEach(({signer}) => {
-        expect(
-          bidderContract.connect(signer).setMaxBid(5, maxBid, {value: maxBid})
-        ).to.be.reverted;
-      });
-    });
-
-    it("Should prevent non-owners from withdrawing any funds", async function() {
+    it("Should prevent random non-bidders from withdrawing funds", async function() {
       let startBalance = await owner.signer.getBalance();
       let maxBid = parseUnits("2", "ether");
       
-      const tx = await bidderContract.setMaxBid(13, maxBid, {value: maxBid});
+      const tx = await owner.signer.sendTransaction({to: bidderContract.address, value: maxBid});
       const rcp = await tx.wait();
       const gasEth = rcp.gasUsed.mul(tx.gasPrice);
 
-      nonOwners.forEach(({signer}) => {
-        expect(
-          bidderContract.connect(signer).pullFunds()
-        ).to.be.reverted;
-      });
-
-      expect(await owner.signer.getBalance()).to.equal(startBalance.sub(maxBid).sub(gasEth));
+      // Check random wallet cannot withdraw
+      expect( bidderContract.connect(random.signer).pullFunds() ).to.be.reverted;
       expect(await ethers.provider.getBalance(bidderContract.address)).to.equal(maxBid);
+      expect(await owner.signer.getBalance()).to.equal(startBalance.sub(maxBid).sub(gasEth));
+    });
+
+    it("Should allow bidders to withdraw funds only to owner", async function() {
+      let ownerStartBalance = await owner.signer.getBalance();
+      let dao1StartBalance = await dao1.signer.getBalance();
+      let maxBid = parseUnits("2", "ether");
+      
+      const tx1 = await owner.signer.sendTransaction({to: bidderContract.address, value: maxBid});
+      const rcp1 = await tx1.wait();
+      const gasEth1 = rcp1.gasUsed.mul(tx1.gasPrice);
+
+      // Confirm bidder withdraws ETH from contract to owner
+      const tx2 = await bidderContract.connect(dao1.signer).pullFunds();
+      const rcp2 = await tx2.wait();
+      const gasEth2 = rcp2.gasUsed.mul(tx2.gasPrice);
+      
+      expect(await ethers.provider.getBalance(bidderContract.address)).to.equal(0);
+      expect(await dao1.signer.getBalance()).to.equal(dao1StartBalance.sub(gasEth2));
+      expect(await owner.signer.getBalance()).to.equal(ownerStartBalance.sub(gasEth1));
     });
   });
 
@@ -194,7 +188,7 @@ describe("SharkDaoBidder", function () {
     });
 
     it("Should prevent non-authoized bidders from bidding", async function() {
-      expect( bidderContract.connect(random.signer).submitBidUnderMax(13, 2000000000000) ).to.be.reverted;
+      expect( bidderContract.connect(random.signer).submitBid(13, 2000000000000) ).to.be.reverted;
     });
   });
 });
