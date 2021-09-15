@@ -65,7 +65,7 @@ describe("SharkDaoBidder", function () {
     });
 
     it(`Should prevent transferring ownership if contract has Ether or Nouns`, async function() {
-      await owner.signer.sendTransaction({to: bidderContract.address, value: parseUnits("0.01", "ether")});
+      await bidderContract.addFunds({value: parseUnits("0.01", "ether")});
       await expect( bidderContract.transferOwnership(dao1.address) ).to.be.reverted;
 
       await bidderContract.pullFunds();
@@ -87,11 +87,20 @@ describe("SharkDaoBidder", function () {
 
 
   describe("Max Bid & Return", async function() {
+    it("Should allow depositing funds directly to contract", async function() {
+      const deposit = ethers.utils.parseEther("0.1");
+
+      await owner.signer.sendTransaction({to: bidderContract.address, value: deposit});
+
+      expect(await ethers.provider.getBalance(bidderContract.address)).to.equal(deposit);
+      await bidderContract.pullFunds();
+    });
+
     it("Should allow owner to withdraw all funds", async function() {
       let startBalance = await owner.signer.getBalance();
       let fundAmount = parseUnits("1", "ether");
       
-      const tx1 = await owner.signer.sendTransaction({to: bidderContract.address, value: fundAmount});
+      const tx1 = await bidderContract.addFunds({value: fundAmount});
       const rcp1 = await tx1.wait();
       const gasEth1 = rcp1.gasUsed.mul(tx1.gasPrice);
 
@@ -111,7 +120,7 @@ describe("SharkDaoBidder", function () {
       let startBalance = await owner.signer.getBalance();
       let maxBid = parseUnits("2", "ether");
       
-      const tx = await owner.signer.sendTransaction({to: bidderContract.address, value: maxBid});
+      const tx = await bidderContract.addFunds({value: maxBid});
       const rcp = await tx.wait();
       const gasEth = rcp.gasUsed.mul(tx.gasPrice);
 
