@@ -83,6 +83,8 @@ contract SharkDaoBidder is Ownable {
     /**
         Authorized Bidder Functions for Bidding, Pulling Funds & Access
      */
+    function addFunds() external payable {} // Convenience function for Etherscan, etc.
+
     function pullFunds() external onlyDaoBidder {
         address ownerAddress = payable(owner()); // Funds MUST go to Owner
         (bool sent, ) = ownerAddress.call{value: address(this).balance}("");
