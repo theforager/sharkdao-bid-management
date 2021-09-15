@@ -1,5 +1,23 @@
 # SharkDAO Bidding Management
 
+This contract enables easier bid management for the Shark DAO in Nouns auctions.
+
+### Functionality
+
+Owner-Only:
+ - `transferOwnership(address)`: Transfer ownership to a new address but requires pulling funds & Nouns first
+ - `renounceOwnership()`: Transfer ownership to the burn address but requires pulling funds & Nouns first
+ - 
+
+DAO Bidder Only:
+ - `removeDaoBidder(address)`: Remove the access of another DAO bidder (available for pre-emptive security but should not be abused)
+ - `submitBid(uint256 nounId, uint256 bid)`: Submit an auction bid of `bid` for the Noun `noundId` (contract must have sufficient funds)
+ - `pullFunds()`: Pull any ETH in the contractat back to the Ownerr
+ - `pullNoun(uint256 _nounId)`: Pull the specified  Noun from the contract back to the Owner
+
+
+## Structure
+
 Simple contract to allow more flexible bidding on Nouns for SharkDAO
 
 `contract` contains the SharkDaoBidder
@@ -8,6 +26,12 @@ Simple contract to allow more flexible bidding on Nouns for SharkDAO
 
 `test` contains unit tests
 
+
+## Setup & Configuration
+
+## Initial Setup
+
+Install NPM dependencies `npm install`
 
 ## Environment Configuration
 
@@ -20,9 +44,9 @@ The following variables must be included in your shell environment where you're 
 `ETHERSCAN_KEY`: Etherscan API key to use for automated verification after deployment
 
 
-## Testing Contract Locally
+## Testing & Deployment
 
-Install NPM dependencies `npm install`
+## Testing Contract Locally
 
 Run tests locally with Hardhat `npx hardhat test`
 
@@ -40,7 +64,7 @@ Mainnet: `npx hardhat run scripts/deploy.js --network mainnet`
 NounsAuctionHouseProxy address is required and hardcoded into `scripts/address.js`
 
 
-## Test Network Testing Tools
+## Nouns Tools
 
 Several tools are available to manage the auctions on test networks:
 
