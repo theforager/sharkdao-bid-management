@@ -35,14 +35,12 @@ import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
 contract SharkDaoBidder is Ownable {
 
-    mapping(uint256 => uint256) public maxBids;
     mapping(address => bool) public daoBidders;
     INounsAuctionHouse auctionHouse;
     IERC721 nouns;
 
     // Equivalent to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     bytes4 internal constant ONERC721RECEIVED_FUNCTION_SIGNATURE = 0x150b7a02;
-
 
     constructor(address _nounsAuctionHouseAddress, address _nounsTokenAddress) {
         auctionHouse = INounsAuctionHouse(_nounsAuctionHouseAddress);
@@ -58,48 +56,50 @@ contract SharkDaoBidder is Ownable {
         _;
     }
 
+    modifier pullAssetsFirst() {
+        require(address(this).balance == 0, "Pull funds before changing ownership");
+        require(nouns.balanceOf(address(this)) == 0, "Pull nouns before changing ownership");
+        _;
+    }
+
 
     /**
-        Owner Maximum Bid, Treasury, & Contract Management Methods
+        Owner-only Privileged Methods for Contract & Access Expansion
      */
-    function transferOwnership(address _newOwner) public override onlyOwner {
-        require(address(this).balance == 0, "Pull funds before changing owner");
-        require(nouns.balanceOf(address(this)) == 0, "Pull nouns before changing owner");
-
+    function transferOwnership(address _newOwner) public override onlyOwner pullAssetsFirst {
         super.transferOwnership(_newOwner);
     }
 
-    function pullFunds() external onlyOwner {
-        address ownerAddress = payable(owner());
+    function renounceOwnership() public override onlyOwner pullAssetsFirst {
+        super.renounceOwnership();
+    }
+
+
+    function addDaoBidder(address _bidder) public onlyOwner {
+        daoBidders[_bidder] = true;
+    }
+
+
+    /**
+        Authorized Bidder Functions for Bidding, Pulling Funds & Access
+     */
+    function pullFunds() external onlyDaoBidder {
+        address ownerAddress = payable(owner()); // Funds MUST go to Owner
         (bool sent, ) = ownerAddress.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
 
-    function pullNoun(uint256 _nounId) external onlyOwner {
-        nouns.safeTransferFrom(address(this), owner(), _nounId);
+    function pullNoun(uint256 _nounId) external onlyDaoBidder {
+        nouns.safeTransferFrom(address(this), owner(), _nounId); // Nouns MUST go to Owner
     }
 
-    function setMaxBid(uint256 _nounId, uint256 _maxBid) external payable onlyOwner {
-        // The max bid can ONLY be set by the owner
-        maxBids[_nounId] = _maxBid;
-        require(address(this).balance >= _maxBid);
-    }
-
-
-    /**
-        Specific Bid Send Methods
-     */
-    function addDaoBidder(address _bidder) public onlyDaoBidder {
-        daoBidders[_bidder] = true;
-    }
-    
     function removeDaoBidder(address _bidder) public onlyDaoBidder {
         delete daoBidders[_bidder];
     }
 
-    function submitBidUnderMax(uint256 _nounId, uint256 _proposedBid) public onlyDaoBidder {
+    function submitBid(uint256 _nounId, uint256 _proposedBid) public onlyDaoBidder {
         // Bids can be submitted by ANYONE in the DAO
-        require(_proposedBid <= maxBids[_nounId], "Proposed bid is above max");
+        require(_proposedBid <= address(this).balance, "Proposed bid is above available contract funds");
         auctionHouse.createBid{value: _proposedBid}(_nounId);
     }
 
