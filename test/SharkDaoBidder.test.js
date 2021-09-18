@@ -64,7 +64,7 @@ describe("SharkDaoBidder", function () {
       });
     });
 
-    it(`Should prevent transferring ownership if contract has Ether or Nouns`, async function() {
+    it(`Should prevent transferring ownership if contract has Ether`, async function() {
       await bidderContract.addFunds({value: parseUnits("0.01", "ether")});
       await expect( bidderContract.transferOwnership(dao1.address) ).to.be.reverted;
 
@@ -74,7 +74,7 @@ describe("SharkDaoBidder", function () {
       expect(await bidderContract.owner()).to.equal(dao1.address);
     });
 
-    it(`Should prevent transferring ownership if contract has Ether or Nouns`, async function() {
+    it(`Should prevent transferring ownership if contract has Nouns`, async function() {
       await nft.mint(bidderContract.address);
       await expect( bidderContract.transferOwnership(dao1.address) ).to.be.reverted;
 
@@ -152,7 +152,7 @@ describe("SharkDaoBidder", function () {
 
 
   describe("Bidding Account Management", async function() {
-    it("Should enable any DAO bidder to add/remove other bidders", async function() {
+    it("Should enable any DAO bidder to remove other bidders", async function() {
       // Add dao2 as a bidder using the owner
       let addTx = await bidderContract.connect(owner.signer).addDaoBidder(dao2.address);
       await addTx.wait();
