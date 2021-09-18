@@ -34,6 +34,8 @@ import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
 
 contract SharkDaoBidder is Ownable {
+    event AddedBidder(address indexed bidder);
+    event RemovedBidder(address indexed bidder);
 
     mapping(address => bool) public daoBidders;
     INounsAuctionHouse auctionHouse;
@@ -77,6 +79,7 @@ contract SharkDaoBidder is Ownable {
 
     function addDaoBidder(address _bidder) public onlyOwner {
         daoBidders[_bidder] = true;
+        emit AddedBidder(_bidder);
     }
 
 
@@ -97,6 +100,7 @@ contract SharkDaoBidder is Ownable {
 
     function removeDaoBidder(address _bidder) public onlyDaoBidder {
         delete daoBidders[_bidder];
+        emit RemovedBidder(_bidder);
     }
 
     function submitBid(uint256 _nounId, uint256 _proposedBid) public onlyDaoBidder {
