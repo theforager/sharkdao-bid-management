@@ -44,9 +44,10 @@ const getAlchemy = (network) => new hre.ethers.providers.AlchemyProvider(network
     const weiBidAmount = hre.ethers.utils.parseEther(ethBidAmount);
     console.log(`   - bid in wei ${weiBidAmount}`);
     
-    const currentAuction = await auctionHouse.createBid(nounId, {value: weiBidAmount});
+    const tx = await auctionHouse.createBid(nounId, {value: weiBidAmount});
+    await tx.wait();
 
-    console.log(currentAuction);
+    console.log('Bid submitted.');
 });
 
 
@@ -60,9 +61,10 @@ task("settle-auction", "Settle the current auction and starts new auction", asyn
   console.log(`Settling auction on ${network} with ${await signer.getAddress()}`);
   const auctionHouse = new hre.ethers.Contract(address.auctionHouseProxy[network], abi.auctionHouseProxy, signer);
   
-  const currentAuction = await auctionHouse.settleCurrentAndCreateNewAuction();
+  const tx = await auctionHouse.settleCurrentAndCreateNewAuction();
+  await tx.wait();
 
-  console.log(currentAuction);
+  console.log('Auction settled.');
 });
 
 
@@ -84,8 +86,9 @@ task("check-auction", "Checks the status of the current auction", async (taskArg
     Current Bid: ${hre.ethers.utils.formatEther(currentAuction.amount)}
     Top Bidder: ${currentAuction.bidder}
 
-    Current Time: ${curSeconds}
-    End Time: ${currentAuction.endTime.toString()}
+    Time Left: ${Math.max(0,currentAuction.endTime.toNumber() - curSeconds)}
+      - Curr Time: ${curSeconds}
+      - End Time: ${currentAuction.endTime.toString()}
 
     Auction Over? ${currentAuction.endTime < curSeconds}
     Settled?  ${currentAuction.settled}
