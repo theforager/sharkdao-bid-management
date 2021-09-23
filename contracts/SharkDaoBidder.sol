@@ -38,8 +38,8 @@ contract SharkDaoBidder is Ownable {
     event RemovedBidder(address indexed bidder);
 
     mapping(address => bool) public daoBidders;
-    INounsAuctionHouse auctionHouse;
-    IERC721 nouns;
+    INounsAuctionHouse public auctionHouse;
+    IERC721 public nouns;
 
     // Equivalent to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     bytes4 internal constant ONERC721RECEIVED_FUNCTION_SIGNATURE = 0x150b7a02;
