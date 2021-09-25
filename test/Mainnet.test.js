@@ -81,19 +81,16 @@ describe("SharkDaoBidder Mainnet Test", function () {
       await impersonateAccount(NOUNS_WHALE_ADDRESS);
       await nounsTokenContract.connect(nounWhale).transferFrom(NOUNS_WHALE_ADDRESS, SHARK_BIDDER_ADDRESS, 48);
       await nounsTokenContract.connect(nounWhale).transferFrom(NOUNS_WHALE_ADDRESS, SHARK_BIDDER_ADDRESS, 49);
-
-      // console.log(`Before 48: ${await nounsTokenContract.connect(nounWhale).ownerOf(48)}`);
-      // console.log(`Before 49: ${await nounsTokenContract.connect(nounWhale).ownerOf(49)}`);
     });
 
-    it("Should stop Forager from withdrawing Nouns", async function() {
+    it("Should stop Forager (not authorized) from withdrawing Nouns", async function() {
       await impersonateAccount(FORAGER_ADDRESS);
 
       expect( sharkBidderContract.connect(forager).pullNoun(48) ).to.be.reverted;
       expect( sharkBidderContract.connect(forager).pullNoun(49) ).to.be.reverted;
     });
 
-    it("Should allow Goldy (authorized bidder) to withdraw Nouns", async function() {
+    it("Should allow Goldy (authorized bidder) to withdraw Nouns to Owner", async function() {
       await impersonateAccount(SHARK_GOLDY_ADDRESS);
 
       expect(await nounsTokenContract.connect(goldy).ownerOf(48)).to.equal(SHARK_BIDDER_ADDRESS);
@@ -106,7 +103,7 @@ describe("SharkDaoBidder Mainnet Test", function () {
       expect(await nounsTokenContract.connect(goldy).ownerOf(49)).to.equal(BIDDER_DEPLOYER_ADDRESS);
     });
 
-    it("Should require Nouns and funds to be withdrawn before transferring ownership", async function() {
+    it("Should allow Owner to transfer ownership ONLY after pulling Nouns and funds", async function() {
       await impersonateAccount(BIDDER_DEPLOYER_ADDRESS);
 
       // Should fail as bidder has ETH and Nouns
